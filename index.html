@@ -2,23 +2,49 @@
 <html>
     <head>
         <title>Web Serial Test</title>
+        <link rel="stylesheet" href="bulma.css">
         <script src="p5.js"></script>
         <script src="p5.webserial.js"></script>
         <script src="app.js"></script>
     </head>
-    <body>
-        <h1>WebUART Example</h1>
-        <button id="connect">Connect</button>
-        <button id="disconnect" disabled>Disconnect</button>
-        <label>
-            Baudrate:
-            <input id="baudrate" type="number" value="9600">
-        </label>
-        <div id="log"></div>
-        <input id="input" type="text" disabled>
-        <button id="send" disabled>Send</button>
-        <input id="register" type="text" placeholder="Register" disabled>
-        <input id="value" type="text" placeholder="Value" disabled>
-        <button id="sendRegVal" disabled>Send Register and Value</button>
+    <body class="container py-4">
+        <h1 class="title">WebUART Example</h1>
+        <div class="field is-grouped">
+            <p class="control">
+                <button id="connect" class="button is-link">Connect</button>
+            </p>
+            <p class="control">
+                <button id="disconnect" class="button" disabled>Disconnect</button>
+            </p>
+        </div>
+        <div class="field">
+            <label class="label" for="baudrate">Baudrate:</label>
+            <div class="control">
+                <input id="baudrate" type="number" class="input" value="9600">
+            </div>
+        </div>
+        <div id="log" class="box"></div>
+        <div class="field">
+            <label class="label" for="input">Input:</label>
+            <div class="control">
+                <input id="input" type="text" class="input" disabled>
+            </div>
+            <p class="control">
+                <button id="send" class="button is-link mt-2" disabled>Send</button>
+            </p>
+        </div>
+        <div class="field">
+            <label class="label" for="register">Register:</label>
+            <div class="control">
+                <input id="register" type="text" class="input" placeholder="Register" disabled>
+            </div>
+            <label class="label" for="value">Value:</label>
+            <div class="control">
+                <input id="value" type="text" class="input" placeholder="Value" disabled>
+            </div>
+            <p class="control">
+                <button id="sendRegVal" class="button is-link mt-2" disabled>Send Register and Value</button>
+            </p>
+        </div>
     </body>
 </html>

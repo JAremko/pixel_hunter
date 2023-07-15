@@ -3,16 +3,11 @@
     <head>
         <title>Web Serial Test</title>
         <link rel="stylesheet" href="bulma.css">
-        <script src="p5.js"></script>
-        <script src="p5.webserial.js"></script>
-        <script src="app.js"></script>
+        <script src="app.js" defer></script>
     </head>
     <body class="container py-4">
         <h1 class="title">I see dead pixels X_X</h1>
         <div class="field is-grouped">
-            <p class="control">
-                <button id="selectDevice" class="button is-link">Select Device</button>
-            </p>
             <p class="control">
                 <button id="connect" class="button is-link">Connect</button>
             </p>
@@ -20,7 +15,7 @@
                 <button id="disconnect" class="button" disabled>Disconnect</button>
             </p>
         </div>
-        <div id="deviceDetails" class="notification"></div>
+        <div id="deviceInfo" class="notification"></div>
         <div class="field">
             <label class="label" for="baudrate">Baudrate:</label>
             <div class="control">

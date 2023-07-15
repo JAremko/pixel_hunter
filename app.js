@@ -1,8 +1,5 @@
 let port;
-let selectDeviceButton;
-let deviceDetails;
 let connectButton;
-let disconnectButton;
 let baudRate;
 let log;
 let input;
@@ -10,91 +7,104 @@ let sendButton;
 let register;
 let value;
 let sendRegValButton;
-let selectedDevice;
 
-function setup() {
-    noCanvas();
+document.addEventListener("DOMContentLoaded", setup);
 
-    selectDeviceButton = select('#selectDevice');
-    deviceDetails = select('#deviceDetails');
-    connectButton = select('#connect');
-    disconnectButton = select('#disconnect');
-    baudRate = select('#baudrate');
-    log = select('#log');
-    input = select('#input');
-    sendButton = select('#send');
-    register = select('#register');
-    value = select('#value');
-    sendRegValButton = select('#sendRegVal');
+async function setup() {
+    connectButton = document.querySelector('#connect');
+    disconnectButton = document.querySelector('#disconnect');
+    baudRate = document.querySelector('#baudrate');
+    log = document.querySelector('#log');
+    input = document.querySelector('#input');
+    sendButton = document.querySelector('#send');
+    register = document.querySelector('#register');
+    value = document.querySelector('#value');
+    sendRegValButton = document.querySelector('#sendRegVal');
 
-    port = createSerial();
+    connectButton.addEventListener('click', connectBtnClick);
+    disconnectButton.addEventListener('click', disconnectBtnClick);
+    sendButton.addEventListener('click', sendBtnClick);
+    sendRegValButton.addEventListener('click', sendRegValBtnClick);
 
-    selectDeviceButton.mousePressed(selectDevice);
-    connectButton.mousePressed(connectBtnClick);
-    disconnectButton.mousePressed(disconnectBtnClick);
-    sendButton.mousePressed(sendBtnClick);
-    sendRegValButton.mousePressed(sendRegValBtnClick);
-}
-
-async function selectDevice() {
-    try {
-        // Prompt user to select any serial port.
-        selectedDevice = await navigator.serial.requestPort();
-        // Assuming device info is available through selectedDevice.getInfo() function.
-        let deviceInfo = `Selected device: ${selectedDevice.getInfo().productName}<br>
-                        Manufacturer: ${selectedDevice.getInfo().manufacturerName}<br>
-                        Serial number: ${selectedDevice.getInfo().serialNumber}`;
-        deviceDetails.html(deviceInfo);
-    } catch (error) {
-        console.error("There was an error selecting a device.", error);
-    }
-}
-
-function draw() {
-    let str = port.readUntil("\n");
-    if (str.length > 0) {
-        log.html(log.html() + str + '<br>');
-        log.elt.scrollTop = log.elt.scrollHeight;
-    }
-}
-
-function connectBtnClick() {
-    if (selectedDevice) {
-        port.open(selectedDevice, parseInt(baudRate.value()));
-        connectButton.attribute('disabled', '');
-        disconnectButton.removeAttribute('disabled');
-        input.removeAttribute('disabled');
-        sendButton.removeAttribute('disabled');
-        register.removeAttribute('disabled');
-        value.removeAttribute('disabled');
-        sendRegValButton.removeAttribute('disabled');
+    if ('serial' in navigator) {
+        connectButton.disabled = false;
     } else {
-        console.log("Please select a device first.");
+        log.textContent = 'Web Serial API not supported by this browser.';
     }
 }
 
-function disconnectBtnClick() {
-    port.close();
-    connectButton.removeAttribute('disabled');
-    disconnectButton.attribute('disabled', '');
-    input.attribute('disabled', '');
-    sendButton.attribute('disabled', '');
-    register.attribute('disabled', '');
-    value.attribute('disabled', '');
-    sendRegValButton.attribute('disabled', '');
+async function connectBtnClick() {
+    port = await navigator.serial.requestPort({});
+    await port.open({ baudRate: parseInt(baudRate.value) });
+
+    connectButton.disabled = true;
+    disconnectButton.disabled = false;
+    input.disabled = false;
+    sendButton.disabled = false;
+    register.disabled = false;
+    value.disabled = false;
+    sendRegValButton.disabled = false;
+
+    while (port.readable) {
+        const textDecoder = new TextDecoderStream();
+        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+        const reader = textDecoder.readable.getReader();
+
+        try {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                log.textContent += value + '\n';
+            }
+        } catch (error) {
+            log.textContent = `Read error: ${error}`;
+        } finally {
+            reader.releaseLock();
+        }
+    }
 }
 
-function sendBtnClick() {
-    port.write(input.value() + '\n');
-    input.value('');
+async function disconnectBtnClick() {
+    if (port) {
+        await port.close();
+        port = null;
+
+        connectButton.disabled = false;
+        disconnectButton.disabled = true;
+        input.disabled = true;
+        sendButton.disabled = true;
+        register.disabled = true;
+        value.disabled = true;
+        sendRegValButton.disabled = true;
+    }
 }
 
-function sendRegValBtnClick() {
-    sendRegisterValue(register.value(), value.value());
-    register.value('');
-    value.value('');
+async function sendBtnClick() {
+    await writeToPort(input.value);
+    input.value = '';
 }
 
-function sendRegisterValue(reg, val) {
-    port.write(`${reg}: ${val}\n`);
+async function sendRegValBtnClick() {
+    await writeToPort(formatBinary(register.value, value.value));
+    register.value = '';
+    value.value = '';
+}
+
+async function writeToPort(data) {
+    const writer = port.writable.getWriter();
+    try {
+        const dataArrayBuffer = new Uint8Array([data]);
+        await writer.write(dataArrayBuffer);
+    } catch (error) {
+        log.textContent = `Write error: ${error}`;
+    } finally {
+        writer.releaseLock();
+    }
+}
+
+function formatBinary(register, value) {
+    // you can modify this function to suit your binary data formatting needs
+    const registerNum = parseInt(register);
+    const valueNum = parseInt(value);
+    return (registerNum << 8) | valueNum;
 }

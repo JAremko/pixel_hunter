@@ -10,7 +10,7 @@ let register;
 let value;
 let sendRegValButton;
 
-async function setup() {
+function setup() {
     noCanvas();
 
     deviceSelect = select('#deviceSelect');
@@ -26,8 +26,7 @@ async function setup() {
 
     port = createSerial();
 
-    await populateDeviceList();
-
+    deviceSelect.mousePressed(populateDeviceList);
     connectButton.mousePressed(connectBtnClick);
     disconnectButton.mousePressed(disconnectBtnClick);
     sendButton.mousePressed(sendBtnClick);
@@ -35,11 +34,16 @@ async function setup() {
 }
 
 async function populateDeviceList() {
-    const ports = await navigator.serial.getPorts();
-    ports.forEach(port => {
-        const option = createOption(port.getInfo().usbProductId);
-        option.parent(deviceSelect);
-    });
+    try {
+        const devices = await navigator.usb.requestDevice({ filters: [{}] });
+        deviceSelect.html('');
+        devices.forEach(device => {
+            const option = createOption(device.productName);
+            option.parent(deviceSelect);
+        });
+    } catch (error) {
+        console.error("There was an error selecting a device.", error);
+    }
 }
 
 function draw() {

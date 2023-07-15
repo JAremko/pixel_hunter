@@ -38,10 +38,12 @@ function setup() {
 
 async function selectDevice() {
     try {
-        selectedDevice = await navigator.usb.requestDevice({ filters: [{}] });
-        let deviceInfo = `Selected device: ${selectedDevice.productName}<br>
-                        Manufacturer: ${selectedDevice.manufacturerName}<br>
-                        Serial number: ${selectedDevice.serialNumber}`;
+        // Prompt user to select any serial port.
+        selectedDevice = await navigator.serial.requestPort();
+        // Assuming device info is available through selectedDevice.getInfo() function.
+        let deviceInfo = `Selected device: ${selectedDevice.getInfo().productName}<br>
+                        Manufacturer: ${selectedDevice.getInfo().manufacturerName}<br>
+                        Serial number: ${selectedDevice.getInfo().serialNumber}`;
         deviceDetails.html(deviceInfo);
     } catch (error) {
         console.error("There was an error selecting a device.", error);

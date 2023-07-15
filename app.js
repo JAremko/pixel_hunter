@@ -1,5 +1,6 @@
 let port;
-let deviceSelect;
+let selectDeviceButton;
+let deviceDetails;
 let connectButton;
 let disconnectButton;
 let baudRate;
@@ -9,11 +10,13 @@ let sendButton;
 let register;
 let value;
 let sendRegValButton;
+let selectedDevice;
 
 function setup() {
     noCanvas();
 
-    deviceSelect = select('#deviceSelect');
+    selectDeviceButton = select('#selectDevice');
+    deviceDetails = select('#deviceDetails');
     connectButton = select('#connect');
     disconnectButton = select('#disconnect');
     baudRate = select('#baudrate');
@@ -26,21 +29,20 @@ function setup() {
 
     port = createSerial();
 
-    deviceSelect.mousePressed(populateDeviceList);
+    selectDeviceButton.mousePressed(selectDevice);
     connectButton.mousePressed(connectBtnClick);
     disconnectButton.mousePressed(disconnectBtnClick);
     sendButton.mousePressed(sendBtnClick);
     sendRegValButton.mousePressed(sendRegValBtnClick);
 }
 
-async function populateDeviceList() {
+async function selectDevice() {
     try {
-        const devices = await navigator.usb.requestDevice({ filters: [{}] });
-        deviceSelect.html('');
-        devices.forEach(device => {
-            const option = createOption(device.productName);
-            option.parent(deviceSelect);
-        });
+        selectedDevice = await navigator.usb.requestDevice({ filters: [{}] });
+        let deviceInfo = `Selected device: ${selectedDevice.productName}<br>
+                        Manufacturer: ${selectedDevice.manufacturerName}<br>
+                        Serial number: ${selectedDevice.serialNumber}`;
+        deviceDetails.html(deviceInfo);
     } catch (error) {
         console.error("There was an error selecting a device.", error);
     }
@@ -55,15 +57,18 @@ function draw() {
 }
 
 function connectBtnClick() {
-    const selectedDevice = deviceSelect.value();
-    port.open(selectedDevice, parseInt(baudRate.value()));
-    connectButton.attribute('disabled', '');
-    disconnectButton.removeAttribute('disabled');
-    input.removeAttribute('disabled');
-    sendButton.removeAttribute('disabled');
-    register.removeAttribute('disabled');
-    value.removeAttribute('disabled');
-    sendRegValButton.removeAttribute('disabled');
+    if (selectedDevice) {
+        port.open(selectedDevice, parseInt(baudRate.value()));
+        connectButton.attribute('disabled', '');
+        disconnectButton.removeAttribute('disabled');
+        input.removeAttribute('disabled');
+        sendButton.removeAttribute('disabled');
+        register.removeAttribute('disabled');
+        value.removeAttribute('disabled');
+        sendRegValButton.removeAttribute('disabled');
+    } else {
+        console.log("Please select a device first.");
+    }
 }
 
 function disconnectBtnClick() {

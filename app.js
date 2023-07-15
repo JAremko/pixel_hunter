@@ -1,4 +1,5 @@
 let port;
+let deviceSelect;
 let connectButton;
 let disconnectButton;
 let baudRate;
@@ -9,9 +10,10 @@ let register;
 let value;
 let sendRegValButton;
 
-function setup() {
+async function setup() {
     noCanvas();
 
+    deviceSelect = select('#deviceSelect');
     connectButton = select('#connect');
     disconnectButton = select('#disconnect');
     baudRate = select('#baudrate');
@@ -24,10 +26,20 @@ function setup() {
 
     port = createSerial();
 
+    await populateDeviceList();
+
     connectButton.mousePressed(connectBtnClick);
     disconnectButton.mousePressed(disconnectBtnClick);
     sendButton.mousePressed(sendBtnClick);
     sendRegValButton.mousePressed(sendRegValBtnClick);
+}
+
+async function populateDeviceList() {
+    const ports = await navigator.serial.getPorts();
+    ports.forEach(port => {
+        const option = createOption(port.getInfo().usbProductId);
+        option.parent(deviceSelect);
+    });
 }
 
 function draw() {
@@ -39,7 +51,8 @@ function draw() {
 }
 
 function connectBtnClick() {
-    port.open('Arduino', parseInt(baudRate.value()));
+    const selectedDevice = deviceSelect.value();
+    port.open(selectedDevice, parseInt(baudRate.value()));
     connectButton.attribute('disabled', '');
     disconnectButton.removeAttribute('disabled');
     input.removeAttribute('disabled');

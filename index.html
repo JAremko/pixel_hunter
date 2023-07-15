@@ -1,0 +1,27 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <title>WebUART Example</title>
+        <style>
+            #log { height: 300px; overflow: auto; }
+            #input { width: 100%; }
+        </style>
+    </head>
+    <body>
+        <h1>WebUART Example</h1>
+        <button id="connect">Connect</button>
+        <button id="disconnect" disabled>Disconnect</button>
+        <label>
+            Baudrate:
+            <input id="baudrate" type="number" value="9600">
+        </label>
+        <div id="log"></div>
+        <input id="input" type="text" disabled>
+        <button id="send" disabled>Send</button>
+        <input id="register" type="text" placeholder="Register" disabled>
+        <input id="value" type="text" placeholder="Value" disabled>
+        <button id="sendRegVal" disabled>Send Register and Value</button>
+
+        <script src="app.js"></script>
+    </body>
+</html>

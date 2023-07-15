@@ -1,11 +1,16 @@
  <!DOCTYPE html>
 <html>
     <head>
-        <title>WebUART Example</title>
-        <style>
-            #log { height: 300px; overflow: auto; }
-            #input { width: 100%; }
-        </style>
+        <title>Web Serial Test</title>
+        <script>
+        window.onload = function() {
+            if ('serial' in navigator) {
+            alert('Web Serial is enabled!');
+            } else {
+            alert('Web Serial is not available. Please use a compatible browser or check if any flags need to be enabled.');
+            }
+        };
+        </script>
     </head>
     <body>
         <h1>WebUART Example</h1>

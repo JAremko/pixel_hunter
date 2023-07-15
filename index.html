@@ -1,16 +1,10 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
     <head>
         <title>Web Serial Test</title>
-        <script>
-        window.onload = function() {
-            if ('serial' in navigator) {
-            alert('Web Serial is enabled!');
-            } else {
-            alert('Web Serial is not available. Please use a compatible browser or check if any flags need to be enabled.');
-            }
-        };
-        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+        <script src="https://gohai.github.io/p5.webserial/p5.webserial.js"></script>
+        <script src="app.js"></script>
     </head>
     <body>
         <h1>WebUART Example</h1>
@@ -26,7 +20,5 @@
         <input id="register" type="text" placeholder="Register" disabled>
         <input id="value" type="text" placeholder="Value" disabled>
         <button id="sendRegVal" disabled>Send Register and Value</button>
-
-        <script src="app.js"></script>
     </body>
 </html>

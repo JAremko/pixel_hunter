@@ -1,78 +1,72 @@
- document.addEventListener('DOMContentLoaded', (event) => {
-    const connectButton = document.getElementById('connect');
-    const disconnectButton = document.getElementById('disconnect');
-    const baudRate = document.getElementById('baudrate');
-    const log = document.getElementById('log');
-    const input = document.getElementById('input');
-    const sendButton = document.getElementById('send');
-    const register = document.getElementById('register');
-    const value = document.getElementById('value');
-    const sendRegValButton = document.getElementById('sendRegVal');
+let port;
+let connectButton;
+let disconnectButton;
+let baudRate;
+let log;
+let input;
+let sendButton;
+let register;
+let value;
+let sendRegValButton;
 
-    let port, reader, writer;
+function setup() {
+    noCanvas();
 
-    connectButton.addEventListener('click', async () => {
-        port = await navigator.serial.requestPort();
-        await port.open({ baudrate: parseInt(baudRate.value) });
+    connectButton = select('#connect');
+    disconnectButton = select('#disconnect');
+    baudRate = select('#baudrate');
+    log = select('#log');
+    input = select('#input');
+    sendButton = select('#send');
+    register = select('#register');
+    value = select('#value');
+    sendRegValButton = select('#sendRegVal');
 
-        let decoder = new TextDecoderStream();
-        inputDone = port.readable.pipeTo(decoder.writable);
-        reader = decoder.readable.getReader();
+    port = createSerial();
 
-        let encoder = new TextEncoderStream();
-        outputDone = encoder.readable.pipeTo(port.writable);
-        writer = encoder.writable.getWriter();
+    connectButton.mousePressed(connectBtnClick);
+    disconnectButton.mousePressed(disconnectBtnClick);
+    sendButton.mousePressed(sendBtnClick);
+    sendRegValButton.mousePressed(sendRegValBtnClick);
+}
 
-        reader.read().then(processIncomingData);
-
-        connectButton.disabled = true;
-        disconnectButton.disabled = false;
-        input.disabled = false;
-        sendButton.disabled = false;
-        register.disabled = false;
-        value.disabled = false;
-        sendRegValButton.disabled = false;
-    });
-
-    disconnectButton.addEventListener('click', async () => {
-        await reader.cancel();
-        await inputDone.catch(() => {});
-        reader = null;
-        inputDone = null;
-
-        await writer.close();
-        await outputDone;
-        writer = null;
-        outputDone = null;
-
-        await port.close();
-        port = null;
-
-        connectButton.disabled = false;
-        disconnectButton.disabled = true;
-        input.disabled = true;
-        sendButton.disabled = true;
-        register.disabled = true;
-        value.disabled = true;
-        sendRegValButton.disabled = true;
-    });
-
-    sendButton.addEventListener('click', () => {
-        writer.write(input.value + '\n');
-        input.value = '';
-    });
-
-    sendRegValButton.addEventListener('click', () => {
-        writer.write(register.value + ': ' + value.value + '\n');
-        register.value = '';
-        value.value = '';
-    });
-
-    function processIncomingData({ done, value }) {
-        if (value) {
-            log.textContent += value + '\n';
-            log.scrollTop = log.scrollHeight;
-            reader.read().then(processIncomingData);
-        }
+function draw() {
+    let str = port.readUntil("\n");
+    if (str.length > 0) {
+        log.html(log.html() + str + '<br>');
+        log.elt.scrollTop = log.elt.scrollHeight;
     }
-});
+}
+
+function connectBtnClick() {
+    port.open('Arduino', parseInt(baudRate.value()));
+    connectButton.attribute('disabled', '');
+    disconnectButton.removeAttribute('disabled');
+    input.removeAttribute('disabled');
+    sendButton.removeAttribute('disabled');
+    register.removeAttribute('disabled');
+    value.removeAttribute('disabled');
+    sendRegValButton.removeAttribute('disabled');
+}
+
+function disconnectBtnClick() {
+    port.close();
+    connectButton.removeAttribute('disabled');
+    disconnectButton.attribute('disabled', '');
+    input.attribute('disabled', '');
+    sendButton.attribute('disabled', '');
+    register.attribute('disabled', '');
+    value.attribute('disabled', '');
+    sendRegValButton.attribute('disabled', '');
+}
+
+function sendBtnClick() {
+    port.write(input.value() + '\n');
+    input.value('');
+}
+
+function sendRegValBtnClick() {
+    port.write(register.value() + ': ' + value.value() + '\n');
+    register.value('');
+    value.value('');
+}

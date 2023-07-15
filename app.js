@@ -88,7 +88,11 @@ function sendBtnClick() {
 }
 
 function sendRegValBtnClick() {
-    port.write(register.value() + ': ' + value.value() + '\n');
+    sendRegisterValue(register.value(), value.value());
     register.value('');
     value.value('');
+}
+
+function sendRegisterValue(reg, val) {
+    port.write(`${reg}: ${val}\n`);
 }
